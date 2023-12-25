@@ -1,1 +1,95 @@
+OVERVIEW:
+# Auto Scaling Group
+# Load Balancer
+# Target Group
+# Bastion Host or Jump Server
 
+STEP 1: Search VPC in AWS Console
+-> Choose VPC and more
+-> give the name
+-> default IP
+-> No IPv6
+-> AZ 2
+-> public subnets-2
+-> private subnets-2
+-> NAT gateways - 1 per AZ
+-> Choose VPC endpoints - None
+-> Click CREATE VPC
+
+STEP 2: Search EC2
+-> Go to Auto Scaling Groups
+-> Click create Auto Scaling Group
+-> Click create launch template
+-> Give a name & Description
+-> For AMI Choose UBUNTU
+-> Choose t2.micro
+-> Choose a key value pair
+-> Click create security group
+-> provide the name & Description
+-> Choose your VPC
+-> For Inbound rules choose: type-ssh, source type-anywhere
+-> Add another rule: type-custom TCP, port-8000, source type-anywhere
+-> Click CREATE LAUNCH TEMPLATE
+
+STEP 3: give Auto Scaling Group name
+-> Choose the launch template
+-> Choose your VPC
+-> In Network: Choose the two private Subnets
+-> Click Next
+-> Choose No Load Balancer
+-> Remaining default, Click Next
+-> Group Size: Desired-2, Minimum-1, Maximum-4
+-> Scaling policies- None
+-> Click Next-> Next
+-> Click CREATE AUTO SCALING GROUP
+
+"Go to EC2 and check the two instances are created with correct subnets"
+
+STEP 4: CREATING BASTION HOST
+-> Give name as bastion-host
+-> Choose UBUNTU - t2.micro
+-> Choose Key pair
+-> In Network Settings - Choose Create Security Group - Allow SSH traffic from Anywhere
+-> Edit - Make sure bastion-host is in the same VPC that you created
+-> Auto assign public IP
+-> Launch the instance
+
+STEP 5: Go to Terminal
+-> scp -i /Users/ARULMOZHI/Downloads/aws_demo.pem /Users/ARULMOZHI/Downloads/aws_demo.pem ubuntu@public IP of bastion-host:/home/ubuntu
+-> yes
+-> ssh -i aws_demo.pem ubuntu@IP of bastion-host
+-> ls  you can see the pem file
+-> take the private IP
+-> ssh -i aws_demo.pem ubuntu@private IP
+-> you can login to private instance
+-> vim index.html
+-> Copy a html code
+-> save file using wq!
+-> python3 -m http.server 8000
+
+STP 6: LOAD BALANCER
+-> Go with Application Load Balancer
+-> provide the name
+-> Internet facing
+-> IPv4
+-> Your VPC
+-> Both AZ's with public subnets
+-> Security Group - select your VPC
+-> In listeners and Rounting - choose create target group
+-> Choose EC2 instances
+-> provide name
+-> protocol HTTP- port 8000
+-> your VPC, HTTP1
+-> Remaining default, Click next
+-> choose the two instances
+-> Choose include as pending
+-> Click CREATE TARGET GROUP
+-> Add the target group in load balcer
+-> CREATE LOAD BALANCER
+
+Go to the security group
+-> inbound rules
+-> add rule - HTTP - port 80
+-> save rules
+
+***NOW you can Acces the Website***
